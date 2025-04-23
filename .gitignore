@@ -1,5 +1,6 @@
 # custom
 sent_articles.json
+infra/main.parameters.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

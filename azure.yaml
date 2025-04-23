@@ -1,0 +1,11 @@
+# azure.yaml
+name: ai-news-bot
+metadata:
+  template: ai-news-bot
+services:
+  ai-news-bot:
+    project: .
+    language: python
+    host: appservice
+    docker:
+      enabled: false

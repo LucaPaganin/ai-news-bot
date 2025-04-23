@@ -54,6 +54,10 @@ resource webApp 'Microsoft.Web/sites@2022-03-01' = {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
           value: '1'
         }
+        { 
+          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+          value: '1'
+        }
       ]
     }
   }

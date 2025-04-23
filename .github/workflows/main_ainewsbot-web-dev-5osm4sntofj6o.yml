@@ -72,10 +72,14 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5626E88E04914FA281A03F098623E257 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AEE155C20215498797598BBC4B1712BC }}
 
+      - name: Set startup command for App Service
+        run: |
+          az webapp config set --name ainewsbot-web-dev-5osm4sntofj6o --resource-group ai-news-bot --startup-file "python bot.py"
+      # Replace <YOUR_RESOURCE_GROUP> as appropriate for your app
+
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'ainewsbot-web-dev-5osm4sntofj6o'
           slot-name: 'Production'
-          

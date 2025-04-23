@@ -27,6 +27,12 @@ topic_classifier = pipeline("zero-shot-classification")
 candidate_labels = ["AI", "Technology", "Health",
                     "Business", "Sports", "Entertainment", "Politics"]
 
+def format_article_summary(title, topic, link):
+    """
+    Format the article summary using Markdown for better readability.
+    """
+    return f"*{title}*\n_Topic: {topic}_\n[Read more]({link})\n"
+
 # Function to fetch RSS feeds and classify the topic
 def fetch_articles():
     summaries = []
@@ -48,7 +54,7 @@ def fetch_articles():
 
         # Store article and classified topic
         summaries.append(
-            f"Title: {title}\nTopic: {topic}\nRead more: {link}\n"
+            format_article_summary(title, topic, link)
         )
 
     return summaries
@@ -56,7 +62,11 @@ def fetch_articles():
 # Function to send weekly summaries to the chat
 async def send_weekly_summary(context: ContextTypes.DEFAULT_TYPE):
     summaries = fetch_articles()
-    await context.bot.send_message(chat_id=CHAT_ID, text="\n\n".join(summaries))
+    await context.bot.send_message(
+        chat_id=CHAT_ID,
+        text="\n\n".join(summaries),
+        parse_mode="Markdown"
+    )
 
 # Command to start the bot
 async def start(update, context):
@@ -67,7 +77,10 @@ async def start(update, context):
 # Command to fetch and send article summaries on demand
 async def update_command(update, context):
     summaries = fetch_articles()
-    await update.message.reply_text("\n\n".join(summaries))
+    await update.message.reply_text(
+        "\n\n".join(summaries),
+        parse_mode="Markdown"
+    )
 
 # Add the /update command handler
 # (This should be registered in main(), but handler definition goes here)

@@ -4,7 +4,6 @@ import json
 import logging
 import yaml
 import feedparser
-import html
 from datetime import time as dtime
 from transformers import pipeline
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
@@ -17,8 +16,8 @@ logging.basicConfig(
 
 try:
     load_dotenv()
-except ImportError as e:
-    print("python-dotenv not installed, skipping .env loading:", e)
+except Exception as e:
+    logging.warning(f"skipping .env loading: {e}")
 
 TELEGRAM_API_TOKEN = os.getenv('TELEGRAM_API_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
@@ -26,9 +25,28 @@ STORAGE_FILE = "sent_articles.json"
 CONFIG_FILE = "config.yaml"
 MAX_MESSAGE_LENGTH = 4096
 
-# Load configuration from YAML
-with open(CONFIG_FILE, "r") as f:
-    config = yaml.safe_load(f)
+# Default configuration if config.yaml is missing or empty
+DEFAULT_CONFIG = {
+    "rss_feeds": [
+        "https://huggingface.co/blog/feed.xml",
+        "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "https://ai.googleblog.com/feeds/posts/default",
+        "https://www.deepmind.com/blog/rss.xml",
+        "https://www.technologyreview.com/feed/topic/artificial-intelligence/",
+        "https://export.arxiv.org/rss/cs.AI",
+        "https://export.arxiv.org/rss/cs.LG"
+    ],
+    "candidate_labels": [
+        "AI", "Technology", "Health", "Business", "Sports", "Entertainment", "Politics"
+    ]
+}
+
+# Load configuration from YAML or fallback to default
+if os.path.exists(CONFIG_FILE):
+    with open(CONFIG_FILE, "r") as f:
+        config = yaml.safe_load(f) or DEFAULT_CONFIG
+else:
+    config = DEFAULT_CONFIG
 
 RSS_FEED_URLS = config.get("rss_feeds", [])
 candidate_labels = config.get("candidate_labels", [])
@@ -88,6 +106,7 @@ def fetch_articles():
                 continue
 
             title = entry.title
+            import html
             summary = getattr(entry, "summary", None)
             if summary:
                 summary = html.unescape(summary)
@@ -105,10 +124,10 @@ def fetch_articles():
 
     return summaries
 
-async def send_daily_summary(context: ContextTypes.DEFAULT_TYPE):
+async def send_weekly_summary(context: ContextTypes.DEFAULT_TYPE):
     summaries = fetch_articles()
     if not summaries:
-        await context.bot.send_message(chat_id=CHAT_ID, text="No new AI articles found.")
+        await context.bot.send_message(chat_id=CHAT_ID, text="No new AI articles found this week.")
         return
 
     full_text = "\n\n".join(summaries)
@@ -132,7 +151,7 @@ def main():
     application = ApplicationBuilder().token(TELEGRAM_API_TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("update", update_command))
-    application.job_queue.run_daily(send_daily_summary, time=dtime(hour=10, minute=0))
+    application.job_queue.run_daily(send_weekly_summary, time=dtime(hour=10, minute=0))
     application.run_polling()
 
 if __name__ == "__main__":

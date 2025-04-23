@@ -1,0 +1,12 @@
+rss_feeds:
+  - "https://huggingface.co/blog/feed.xml"
+  - "https://techcrunch.com/category/artificial-intelligence/feed/"
+  
+candidate_labels:
+  - "AI"
+  - "Technology"
+  - "Health"
+  - "Business"
+  - "Sports"
+  - "Entertainment"
+  - "Politics"

@@ -82,4 +82,3 @@ jobs:
         id: deploy-to-webapp
         with:
           app-name: 'ainewsbot-web-dev-5osm4sntofj6o'
-          slot-name: 'Production'
